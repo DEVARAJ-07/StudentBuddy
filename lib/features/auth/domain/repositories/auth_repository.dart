@@ -6,6 +6,8 @@ abstract class AuthRepository {
     required String email,
     required String password,
     required String name,
+    required String gender,
+    required String dob,
   });
   Future<AuthResponse> signInWithEmailPassword({
     required String email,

@@ -54,7 +54,7 @@ class _TestArenaPageState extends State<TestArenaPage> {
   @override
   Widget build(BuildContext context) {
     // Mock Question
-    final question =
+    const question =
         "What is the primary function of the mitochondria in a cell?";
     final options = [
       "Protein Synthesis",

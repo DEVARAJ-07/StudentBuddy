@@ -24,10 +24,10 @@ class StreakWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
+              const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     "Daily Streak 🔥",
                     style: TextStyle(
                       color: Colors.black87,

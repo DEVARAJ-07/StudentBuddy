@@ -3,12 +3,12 @@ import '../../../../core/theme/app_pallete.dart';
 
 class AuthGradientButton extends StatelessWidget {
   final String buttonText;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   const AuthGradientButton({
     super.key,
     required this.buttonText,
-    required this.onPressed,
+    this.onPressed,
   });
 
   @override

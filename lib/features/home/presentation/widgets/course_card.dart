@@ -107,8 +107,8 @@ class CourseCard extends StatelessWidget {
                 ),
 
                 // Action Button
-                Padding(
-                  padding: const EdgeInsets.only(right: 16),
+                const Padding(
+                  padding: EdgeInsets.only(right: 16),
                   child: CircleAvatar(
                     backgroundColor: AppPallete.background,
                     child: Icon(

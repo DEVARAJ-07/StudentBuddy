@@ -124,7 +124,7 @@ class GlassDrawer extends StatelessWidget {
         highlightColor: Colors.white.withValues(alpha: 0.05),
         child: Container(
           decoration: isActive
-              ? BoxDecoration(
+              ? const BoxDecoration(
                   border: Border(
                     left: BorderSide(color: AppPallete.primary, width: 4),
                   ),
@@ -170,8 +170,8 @@ class GlassDrawer extends StatelessWidget {
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Row(
-            children: const [
+          child: const Row(
+            children: [
               Icon(Icons.logout, color: Colors.redAccent, size: 24),
               SizedBox(width: 16),
               Text(

@@ -94,13 +94,13 @@ class WelcomePage extends StatelessWidget {
                   const Spacer(),
 
                   // Holographic Neural Logo (Replaces Image)
-                  Hero(
+                  const Hero(
                         tag: 'app_logo',
                         child: SizedBox(
                           height: 300,
                           child: Stack(
                             alignment: Alignment.center,
-                            children: [const NeuralHologram(size: 250)],
+                            children: [NeuralHologram(size: 250)],
                           ),
                         ),
                       )

@@ -25,6 +25,8 @@ class _SignupPageState extends State<SignupPage> {
   final formKey = GlobalKey<FormState>();
   bool _isPasswordObscure = true;
   bool _isConfirmPasswordObscure = true;
+  bool _isLoading = false;
+  String _selectedGender = 'male';
 
   @override
   void dispose() {
@@ -46,13 +48,14 @@ class _SignupPageState extends State<SignupPage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.dark(
-              // Dark theme picker
               primary: AppPallete.primary,
               onPrimary: Colors.white,
               surface: AppPallete.surface,
               onSurface: Colors.white,
             ),
-            dialogTheme: DialogThemeData(backgroundColor: AppPallete.surface),
+            dialogTheme: const DialogThemeData(
+              backgroundColor: AppPallete.surface,
+            ),
           ),
           child: child!,
         );
@@ -63,6 +66,104 @@ class _SignupPageState extends State<SignupPage> {
         dobController.text = "${picked.day}/${picked.month}/${picked.year}";
       });
     }
+  }
+
+  Future<void> _handleSignUp() async {
+    if (!formKey.currentState!.validate()) return;
+
+    if (passwordController.text != confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Passwords do not match!'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final authRepo = AuthRepositoryImpl(
+        AuthRemoteDataSourceImpl(Supabase.instance.client),
+      );
+
+      await authRepo.signUpWithEmailPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+        name: nameController.text.trim(),
+        gender: _selectedGender,
+        dob: dobController.text.trim(),
+      );
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Account Created! Please Sign In.'),
+            backgroundColor: AppPallete.success,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } on AuthException catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        String msg = e.message;
+        if (msg.toLowerCase().contains('already registered') || e.statusCode == '422') {
+          msg = 'This email is already registered. Please Login or use another email.';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(msg),
+            backgroundColor: Colors.redAccent,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An unexpected error occurred: $e'),
+            backgroundColor: Colors.redAccent,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildGenderOption(String title, String value, IconData icon) {
+    final isSelected = _selectedGender == value;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedGender = value),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? AppPallete.primary.withValues(alpha: 0.2) : AppPallete.surface.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isSelected ? AppPallete.primary : Colors.white.withValues(alpha: 0.1),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: isSelected ? AppPallete.primary : AppPallete.textSecondary, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: GoogleFonts.inter(
+                color: isSelected ? AppPallete.primary : AppPallete.textSecondary,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -80,14 +181,59 @@ class _SignupPageState extends State<SignupPage> {
               height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppPallete.secondary.withValues(alpha: 0.2),
+                color: AppPallete.secondary.withValues(alpha: 0.15),
                 boxShadow: [
                   BoxShadow(
-                    color: AppPallete.secondary.withValues(alpha: 0.2),
+                    color: AppPallete.secondary.withValues(alpha: 0.15),
                     blurRadius: 100,
                     spreadRadius: 50,
                   ),
                 ],
+              ),
+            ),
+          ),
+
+          Positioned(
+            bottom: -80,
+            right: -80,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppPallete.primary.withValues(alpha: 0.1),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppPallete.primary.withValues(alpha: 0.1),
+                    blurRadius: 80,
+                    spreadRadius: 40,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Back button
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppPallete.surface.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.1),
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: AppPallete.textPrimary,
+                    size: 20,
+                  ),
+                ),
               ),
             ),
           ),
@@ -104,7 +250,7 @@ class _SignupPageState extends State<SignupPage> {
                     Text(
                           'Create Account',
                           style: GoogleFonts.poppins(
-                            fontSize: 32,
+                            fontSize: 28,
                             fontWeight: FontWeight.bold,
                             color: AppPallete.textPrimary,
                           ),
@@ -138,165 +284,161 @@ class _SignupPageState extends State<SignupPage> {
                           color: AppPallete.surface,
                           child: Column(
                             children: [
+                              // Full Name
                               AuthField(
                                 hintText: 'Full Name',
                                 controller: nameController,
+                                prefixIcon: const Icon(
+                                  Icons.person_outline_rounded,
+                                  color: AppPallete.textSecondary,
+                                  size: 22,
+                                ),
                               ),
-                              const SizedBox(height: 15),
+                              const SizedBox(height: 16),
 
+                              // Email
                               AuthField(
                                 hintText: 'Email',
                                 controller: emailController,
+                                keyboardType: TextInputType.emailAddress,
+                                prefixIcon: const Icon(
+                                  Icons.mail_outline_rounded,
+                                  color: AppPallete.textSecondary,
+                                  size: 22,
+                                ),
+                                validator: AuthField.emailValidator,
                               ),
-                              const SizedBox(height: 15),
+                              const SizedBox(height: 16),
 
+                              // Date of Birth
                               GestureDetector(
                                 onTap: () => _selectDate(context),
                                 child: AbsorbPointer(
                                   child: AuthField(
-                                    hintText: 'DOB (DD/MM/YYYY)',
+                                    hintText: 'Date of Birth',
                                     controller: dobController,
-                                    suffixIcon: const Padding(
-                                      padding: EdgeInsets.all(12.0),
-                                      child: Icon(
-                                        Icons.calendar_month,
-                                        color: AppPallete.primary,
-                                      ),
+                                    prefixIcon: const Icon(
+                                      Icons.calendar_month_rounded,
+                                      color: AppPallete.textSecondary,
+                                      size: 22,
+                                    ),
+                                    suffixIcon: const Icon(
+                                      Icons.arrow_drop_down_rounded,
+                                      color: AppPallete.textSecondary,
                                     ),
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 15),
+                              const SizedBox(height: 16),
 
+                              // Gender Selection
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildGenderOption('Male', 'male', Icons.male_rounded),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildGenderOption('Female', 'female', Icons.female_rounded),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+
+                              // Password
                               AuthField(
                                 hintText: 'Password',
                                 controller: passwordController,
                                 isObscureText: _isPasswordObscure,
+                                prefixIcon: const Icon(
+                                  Icons.lock_outline_rounded,
+                                  color: AppPallete.textSecondary,
+                                  size: 22,
+                                ),
                                 suffixIcon: IconButton(
                                   icon: Icon(
                                     _isPasswordObscure
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
+                                        ? Icons.visibility_off_rounded
+                                        : Icons.visibility_rounded,
                                     color: AppPallete.textSecondary,
                                   ),
                                   onPressed: () {
-                                    setState(() {
-                                      _isPasswordObscure = !_isPasswordObscure;
-                                    });
+                                    setState(
+                                      () => _isPasswordObscure =
+                                          !_isPasswordObscure,
+                                    );
                                   },
                                 ),
+                                validator: AuthField.passwordValidator,
                               ),
-                              const SizedBox(height: 15),
+                              const SizedBox(height: 16),
 
+                              // Confirm Password
                               AuthField(
                                 hintText: 'Confirm Password',
                                 controller: confirmPasswordController,
                                 isObscureText: _isConfirmPasswordObscure,
+                                prefixIcon: const Icon(
+                                  Icons.lock_outline_rounded,
+                                  color: AppPallete.textSecondary,
+                                  size: 22,
+                                ),
                                 suffixIcon: IconButton(
                                   icon: Icon(
                                     _isConfirmPasswordObscure
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
+                                        ? Icons.visibility_off_rounded
+                                        : Icons.visibility_rounded,
                                     color: AppPallete.textSecondary,
                                   ),
                                   onPressed: () {
-                                    setState(() {
-                                      _isConfirmPasswordObscure =
-                                          !_isConfirmPasswordObscure;
-                                    });
+                                    setState(
+                                      () => _isConfirmPasswordObscure =
+                                          !_isConfirmPasswordObscure,
+                                    );
                                   },
                                 ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please confirm your password';
+                                  }
+                                  if (value != passwordController.text) {
+                                    return 'Passwords do not match';
+                                  }
+                                  return null;
+                                },
                               ),
 
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 24),
 
+                              // Sign Up Button
                               AuthGradientButton(
-                                buttonText: 'Sign Up',
-                                onPressed: () async {
-                                  final name = nameController.text.trim();
-                                  final email = emailController.text.trim();
-                                  final password = passwordController.text
-                                      .trim();
-                                  final confirm = confirmPasswordController.text
-                                      .trim();
-
-                                  if (name.isEmpty ||
-                                      email.isEmpty ||
-                                      password.isEmpty ||
-                                      confirm.isEmpty) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text("Please fill all fields"),
-                                      ),
-                                    );
-                                    return;
-                                  }
-
-                                  if (password != confirm) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          "Passwords do not match!",
-                                        ),
-                                      ),
-                                    );
-                                    return;
-                                  }
-
-                                  final authRepo = AuthRepositoryImpl(
-                                    AuthRemoteDataSourceImpl(
-                                      Supabase.instance.client,
-                                    ),
-                                  );
-
-                                  try {
-                                    await authRepo.signUpWithEmailPassword(
-                                      email: email,
-                                      password: password,
-                                      name: name,
-                                    );
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            "Account Created! Please Sign In.",
-                                          ),
-                                        ),
-                                      );
-                                      Navigator.pop(context);
-                                    }
-                                  } catch (e) {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(content: Text("Error: $e")),
-                                      );
-                                    }
-                                  }
-                                },
+                                buttonText: _isLoading
+                                    ? 'Creating Account...'
+                                    : 'Sign Up',
+                                onPressed: _isLoading ? null : _handleSignUp,
                               ),
                             ],
                           ),
                         )
                         .animate()
                         .fadeIn(delay: 400.ms)
-                        .scale(begin: const Offset(0.9, 0.9)),
+                        .scale(begin: const Offset(0.95, 0.95)),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
 
+                    // Login Link
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: RichText(
                         text: TextSpan(
                           text: 'Already have an account? ',
-                          style: TextStyle(color: AppPallete.textSecondary),
+                          style: GoogleFonts.inter(
+                            color: AppPallete.textSecondary,
+                          ),
                           children: [
                             TextSpan(
                               text: 'Login',
-                              style: TextStyle(
+                              style: GoogleFonts.inter(
                                 color: AppPallete.primary,
                                 fontWeight: FontWeight.bold,
                               ),

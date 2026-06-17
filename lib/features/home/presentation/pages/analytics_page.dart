@@ -40,11 +40,11 @@ class AnalyticsPage extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _InfoItem(label: "Average", value: "85%"),
+                  const _InfoItem(label: "Average", value: "85%"),
                   Container(width: 1, height: 40, color: Colors.white24),
-                  _InfoItem(label: "Tests Taken", value: "12"),
+                  const _InfoItem(label: "Tests Taken", value: "12"),
                   Container(width: 1, height: 40, color: Colors.white24),
-                  _InfoItem(label: "Ranking", value: "#4"),
+                  const _InfoItem(label: "Ranking", value: "#4"),
                 ],
               ),
             ),
