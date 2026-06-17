@@ -1,35 +1,67 @@
 # 🎓 StudentBuddy
 
-StudentBuddy is an AI-powered educational ecosystem that bridges the gap between productivity, mentorship, and assessment. Designed with a vibrant, intuitive UI, it acts as a central hub where students can track their learning, take assessments, and receive 24/7 personalized tutoring. Admins are provided with robust tools to manage student progress, assignments, and test creation.
+**StudentBuddy** is an AI-powered educational ecosystem designed to bridge the gap between productivity, mentorship, and assessment. Drawing UI/UX inspiration from premium, high-engagement consumer platforms like Zomato and Instamart, the app features rich color gradients, glassmorphism elements, custom animations, and shimmer loaders.
 
-## 🚀 Key Features
-* **Role-Based Access Control:** Distinct zones for Students, Admins, and SuperAdmins.
-* **AI Mentor Chat:** 24/7 personalized tutoring powered by Google Gemini API, featuring text, speech-to-text, and image-based (OCR) homework analysis.
-* **Interactive Roadmap:** A highly immersive, database-synced roadmap to track student progress and experience levels.
-* **Testing Arena & Analytics:** Secure environments for taking tests with built-in anti-cheat measures, followed by detailed graphical analytics (trends and subject strengths) using `fl_chart`.
-* **Real-time Notifications:** Instant alerts for new assignments or tests.
-* **Admin Dashboard:** Comprehensive tools for managing students, uploading CSV-based tests, and tracking platform usage.
+---
 
-## 🛠️ Tech Stack
-* **Frontend:** Flutter (Mobile for Android/iOS + Web for Dashboards)
-* **Backend as a Service:** Supabase (Auth, PostgreSQL Database, Storage, Real-time)
-* **AI Engine:** Google Generative AI (Gemini API) + Local Python Backend (via ngrok) for advanced interactions
-* **State Management & Routing:** `provider` and `go_router`
-* **UI/UX & Graphics:** `flutter_animate`, `lottie`, `google_fonts`, `fl_chart`
-* **Authentication:** Supabase Auth & Google Sign-In (`google_sign_in`)
-* **Utilities:** `syncfusion_flutter_pdf` for report generation, `excel` for parsing, and `cached_network_image`.
+## 🛠️ Core Technologies & Environment Setup
 
-## 🎨 UI/UX Philosophy
-The application features a modern, colorful, and engaging user interface, drawing inspiration from high-engagement apps like Zomato and Instamart. It utilizes lively animations, shimmer effects for loading states, rich color gradients, and glassmorphism elements to deliver a premium, fluid user experience.
+To run or build StudentBuddy locally, ensure your development environment is configured with the following toolchain:
 
-## 🏁 Getting Started
-1. **Clone the repository:** `git clone https://github.com/your-repo/student_buddy.git`
-2. **Install dependencies:** `flutter pub get`
-3. **Setup Environments:** Create a `.env` file at the root containing necessary API keys (Supabase, Gemini, etc.).
-4. **Run the app:** `flutter run`
+### 1. Flutter & Dart SDK
+* **Flutter Version:** Ensure you have Flutter SDK `3.10.4` or higher installed.
+* **Dart Version:** Compatible with Dart SDK `^3.10.4`.
+* **Path Variables:** Ensure the Flutter binary is accessible via your path command line tools.
 
-## 📲 Download the App (APK)
+### 2. Android Studio (IDE)
+* **Plugins:** Install the **Flutter** and **Dart** plugins via `Settings > Plugins` inside Android Studio.
+* **SDK Manager:** From Android Studio, open the SDK Manager and install:
+  * Android SDK Build-Tools
+  * Android Emulator & Platform Tools
+  * Android SDK Command-line Tools (latest version)
+* **Device Setup:** Configure an Android Emulator (AVD) with API level 21 or higher (Lollipop+) or connect a physical Android device with USB Debugging enabled.
 
-For testing and installation on Android devices, you can download the built APK directly from this repository:
+### 3. Supabase BaaS (Backend)
+StudentBuddy leverages **Supabase** as its database, authentication provider, storage engine, and real-time event system:
+* **Authentication:** Handled via Supabase Auth with Google Sign-in OAuth flow integration.
+* **Database:** Powered by PostgreSQL containing custom schemas for roles (`profiles`), test configurations, result tables, and streaks.
+* **Real-time Engine:** Syncs active test announcements and alerts directly to student dashboards.
+
+---
+
+## 🚀 Dev Setup & Execution
+
+### 1. Get Dependencies
+Run the package resolver from the project root:
+```bash
+flutter pub get
+```
+
+### 2. Setup Environment Keys
+Create a `.env` configuration file in the root directory to store your API keys. Make sure **not** to commit this file to public version control:
+```env
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_ANON_KEY=your-supabase-anonymous-key
+DEEPSEEK_API_KEY=your-deepseek-api-key
+OPENROUTER_KEY=your-openrouter-api-key
+```
+
+### 3. Run and Debug
+Launch the application on your configured Android Emulator, iOS Simulator, or Web browser:
+```bash
+flutter run
+```
+
+---
+
+## 📲 APK Download & Local Builds
+
+For quick installations on Android devices for testing purposes, you can download the pre-built release package:
+
 * 📥 **[Download Latest Release APK](file:///d:/Projects/student_buddy/build/app/outputs/flutter-apk/app-release.apk)**
-* Alternatively, navigate to: `build/app/outputs/flutter-apk/app-release.apk`
+* Alternatively, locate the binary locally at: `build/app/outputs/flutter-apk/app-release.apk`
+
+To compile a fresh APK manually:
+```bash
+flutter build apk --release
+```
